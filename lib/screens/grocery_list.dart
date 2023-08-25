@@ -20,14 +20,22 @@ class _GroceryListState extends State<GroceryList> {
     if (_groceryList.isNotEmpty) {
       content = ListView.builder(
         itemBuilder: (context, index) {
-          return ListTile(
-            trailing: Text(_groceryList[index].quantity.toString()),
-            leading: Container(
-              width: 24,
-              height: 24,
-              color: _groceryList[index].category.color,
+          return Dismissible(
+            key: ValueKey(_groceryList[index].id),
+            onDismissed: (direction) {
+              setState(() {
+                _groceryList.removeAt(index);
+              });
+            },
+            child: ListTile(
+              trailing: Text(_groceryList[index].quantity.toString()),
+              leading: Container(
+                width: 24,
+                height: 24,
+                color: _groceryList[index].category.color,
+              ),
+              title: Text(_groceryList[index].name),
             ),
-            title: Text(_groceryList[index].name),
           );
         },
         itemCount: _groceryList.length,
