@@ -32,16 +32,16 @@ class _NewItemScreenState extends State<NewItemScreen> {
             'quantity': _enteredQuantity,
             'category': _selectedCategory.name
           }));
-      print(response);
+      
       if(!context.mounted){
         return;
       }
-      Navigator.pop(context);
-      // Navigator.of(context).pop(GroceryItem(
-      //     id: DateTime.now().toString(),
-      //     name: _enteredName,
-      //     quantity: _enteredQuantity,
-      //     category: _selectedCategory));
+      final Map<String,dynamic> resData = json.decode(response.body);
+      Navigator.of(context).pop(GroceryItem(
+          id: resData['name'],
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory));
     }
   }
 
