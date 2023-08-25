@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_app/data/dummy_items.dart';
+import 'package:flutter_form_app/data/grocery_item.dart';
 import 'package:flutter_form_app/screens/new_item.dart';
 
 class GroceryList extends StatefulWidget {
@@ -10,34 +11,46 @@ class GroceryList extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryList> {
+  List<GroceryItem> _groceryList = [];
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Groceries'),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (builder) => NewItemScreen()));
-              },
-              icon: Icon(Icons.add))
-        ],
-      ),
-      body: ListView.builder(
+    Widget content = const Center(
+      child: Text('There is no task data'),
+    );
+    if (_groceryList.isNotEmpty) {
+      content = ListView.builder(
         itemBuilder: (context, index) {
           return ListTile(
-            trailing: Text(groceryItems[index].quantity.toString()),
+            trailing: Text(_groceryList[index].quantity.toString()),
             leading: Container(
               width: 24,
               height: 24,
-              color: groceryItems[index].category.color,
+              color: _groceryList[index].category.color,
             ),
-            title: Text(groceryItems[index].name),
+            title: Text(_groceryList[index].name),
           );
         },
-        itemCount: groceryItems.length,
-      ),
-    );
+        itemCount: _groceryList.length,
+      );
+    }
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Groceries'),
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  final newItem = await Navigator.of(context).push<GroceryItem>(
+                      MaterialPageRoute(builder: (builder) => NewItemScreen()));
+                  if (newItem == null) {
+                    return;
+                  }
+                  setState(() {
+                    _groceryList.add(newItem);
+                  });
+                },
+                icon: Icon(Icons.add))
+          ],
+        ),
+        body: content);
   }
 }
