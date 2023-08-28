@@ -35,9 +35,7 @@ class _GroceryListState extends State<GroceryList> {
           return Dismissible(
             key: ValueKey(_groceryList[index].id),
             onDismissed: (direction) {
-              setState(() {
-                _groceryList.removeAt(index);
-              });
+              _deleteItem(_groceryList[index]);
             },
             child: ListTile(
               trailing: Text(_groceryList[index].quantity.toString()),
@@ -83,6 +81,21 @@ class _GroceryListState extends State<GroceryList> {
       _groceryList.add(item);
       isLoading = false;
     });
+  }
+
+  void _deleteItem(GroceryItem item) async {
+    final index = _groceryList.indexOf(item);
+    setState(() {
+      _groceryList.remove(item);
+    });
+    final url = Uri.https('fir-prep-c590d-default-rtdb.firebaseio.com',
+        'shopping-list/${item.id}.json');
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryList.insert(index, item);
+      });
+    }
   }
 
   void _loadItem() async {
