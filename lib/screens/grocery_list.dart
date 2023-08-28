@@ -17,6 +17,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryList = [];
   var isLoading = true;
+  String? _error;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +53,11 @@ class _GroceryListState extends State<GroceryList> {
         itemCount: _groceryList.length,
       );
     }
+    if (_error != null) {
+      content = Center(
+        child: Text(_error ?? ''),
+      );
+    }
     return Scaffold(
         appBar: AppBar(
           title: const Text('Groceries'),
@@ -83,6 +89,11 @@ class _GroceryListState extends State<GroceryList> {
     final url = Uri.https(
         'fir-prep-c590d-default-rtdb.firebaseio.com', 'shopping-list.json');
     final response = await http.get(url);
+    if (response.statusCode >= 400) {
+      setState(() {
+        _error = 'Failed to fetch data. Please try again later.';
+      });
+    }
     final List<GroceryItem> _loadedItems = [];
     final Map<String, dynamic> listData = json.decode(response.body);
     for (final item in listData.entries) {
