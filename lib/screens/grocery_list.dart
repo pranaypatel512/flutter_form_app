@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_app/data/categories.dart';
-import 'package:flutter_form_app/data/dummy_items.dart';
 import 'package:flutter_form_app/data/grocery_item.dart';
 import 'package:flutter_form_app/screens/new_item.dart';
 import 'package:http/http.dart' as http;
@@ -100,30 +99,45 @@ class _GroceryListState extends State<GroceryList> {
 
   void _loadItem() async {
     final url = Uri.https(
-        'fir-prep-c590d-default-rtdb.firebaseio.com', 'shopping-list.json');
-    final response = await http.get(url);
-    if (response.statusCode >= 400) {
+        'fir-prep-c590d-default-rtdb.firebaseio', 'shopping-list.json');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode >= 400) {
+        setState(() {
+          _error = 'Failed to fetch data. Please try again later.';
+        });
+      }
+
+      if (response.body == 'null') {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+      final List<GroceryItem> _loadedItems = [];
+      final Map<String, dynamic> listData = json.decode(response.body);
+      for (final item in listData.entries) {
+        _loadedItems.add(GroceryItem(
+          id: item.key,
+          name: item.value['name'],
+          quantity: item.value['quantity'],
+          category: categories.entries
+              .firstWhere(
+                  (element) => element.value.name == item.value['category']!)
+              .value,
+        ));
+      }
       setState(() {
-        _error = 'Failed to fetch data. Please try again later.';
+        _groceryList = _loadedItems;
+        isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _error = 'Something went. Please try again later.';
       });
     }
-    final List<GroceryItem> _loadedItems = [];
-    final Map<String, dynamic> listData = json.decode(response.body);
-    for (final item in listData.entries) {
-      _loadedItems.add(GroceryItem(
-        id: item.key,
-        name: item.value['name'],
-        quantity: item.value['quantity'],
-        category: categories.entries
-            .firstWhere(
-                (element) => element.value.name == item.value['category']!)
-            .value,
-      ));
-    }
-    setState(() {
-      _groceryList = _loadedItems;
-      isLoading = false;
-    });
   }
 
   @override
